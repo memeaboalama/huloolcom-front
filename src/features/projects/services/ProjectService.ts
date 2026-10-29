@@ -386,6 +386,10 @@ export class ProjectService {
     await apiClient.post<null>(`/tasks/${taskId}/notes`, { content });
   }
 
+  static async addEducatorTaskNote(taskId: string, content: string): Promise<void> {
+    await apiClient.post<null>(`/educator/tasks/${taskId}/notes`, { content });
+  }
+
   /**
    * Opportunities (Public Tasks for Educators)
    */

@@ -208,7 +208,7 @@ const ProjectsView: React.FC<ProjectsViewProps> = ({ navigateTo, activeTab }) =>
       paginated: "true" as const,
       per_page: perPage,
       page: currentPage,
-      tab: activeTab
+      tab: activeTab,
     };
 
     if (debouncedSearch.trim()) params.search = debouncedSearch.trim();

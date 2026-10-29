@@ -5,7 +5,7 @@ import LanguageSwitcher from '../../../shared/components/LanguageSwitcher';
 import { ViewType } from '../../../shared/types';
 import { useLanguage } from '../../../app/providers/LanguageProvider';
 import { useAdminProjectTabCounts } from '../../../core/hooks/useAdminQueries';
-import { isProjectAreaView, PROJECT_SECTIONS } from '../constants/projectSections';
+import { isProjectAreaView, PROJECT_SIDEBAR_SECTIONS } from '../constants/projectSections';
 
 interface AdminSidebarProps {
   currentView: ViewType;
@@ -157,7 +157,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ currentView, navigateTo, is
               navigateTo('projects');
             }}
           >
-            {PROJECT_SECTIONS.map((section) => {
+            {PROJECT_SIDEBAR_SECTIONS.map((section) => {
               const SectionIcon = section.icon;
               return (
                 <NavItem

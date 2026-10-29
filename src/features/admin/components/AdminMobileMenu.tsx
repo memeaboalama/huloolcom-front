@@ -3,7 +3,7 @@ import { ViewType } from '../../../shared/types';
 import { DashboardIcon, BookOpenIcon, ChevronDownIcon, AcademicCapIcon, UsersIcon, UserCheckIcon, SettingsIcon, XIcon, ProjectsIcon, ReceiptPercentIcon, ChartBarIcon, CalendarIcon, LifebuoyIcon, LogoutIcon, GlobeAltIcon } from '../../../shared/components/Icons';
 import { useLanguage } from '../../../app/providers/LanguageProvider';
 import { useAdminProjectTabCounts } from '../../../core/hooks/useAdminQueries';
-import { isProjectAreaView, PROJECT_SECTIONS } from '../constants/projectSections';
+import { isProjectAreaView, PROJECT_SIDEBAR_SECTIONS } from '../constants/projectSections';
 
 interface AdminMobileMenuProps {
     isOpen: boolean;
@@ -130,7 +130,7 @@ const AdminMobileMenu: React.FC<AdminMobileMenuProps> = ({ isOpen, onClose, curr
                             isOpen={isProjectsOpen}
                             onToggle={() => setProjectsOpen((open) => !open)}
                          >
-                            {PROJECT_SECTIONS.map((section) => {
+                            {PROJECT_SIDEBAR_SECTIONS.map((section) => {
                                 const SectionIcon = section.icon;
                                 return (
                                     <NavLink

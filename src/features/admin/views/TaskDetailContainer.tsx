@@ -233,7 +233,9 @@ const TaskDetailContainer: React.FC<Props> = ({ projectId, taskId, navigateTo })
           addToast && addToast(e?.message || 'فشل رفع المرفق', 'error');
         }
       }}
-      onDeleteSubTask={(pid, tid, subTaskId) => deleteSubTask.mutate({ projectId: pid, taskId: tid, subTaskId })}
+      onDeleteSubTask={async (pid, tid, subTaskId) => {
+        await deleteSubTask.mutateAsync({ projectId: pid, taskId: tid, subTaskId });
+      }}
     />
   );
 };

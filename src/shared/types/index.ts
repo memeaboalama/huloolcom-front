@@ -26,6 +26,7 @@ export type ViewType =
   'projectsWithOffers' |
   'projectsWithoutOffers' |
   'projectsPendingReview' |
+  'projectsPending' |
   'projectsInProgress' |
   'projectsCompleted' |
   'projectsCanceled' |

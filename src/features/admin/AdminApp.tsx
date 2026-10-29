@@ -79,6 +79,7 @@ const AdminApp: React.FC<AdminAppProps> = ({ onLogout }) => {
             case 'projectsWithOffers':
             case 'projectsWithoutOffers':
             case 'projectsPendingReview':
+            case 'projectsPending':
             case 'projectsInProgress':
             case 'projectsCompleted':
             case 'projectsCanceled':

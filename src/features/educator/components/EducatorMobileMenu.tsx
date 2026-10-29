@@ -6,9 +6,9 @@ import {
     ProjectsIcon,
     FileTextIcon,
     AcademicCapIcon,
-    WalletIcon,
-    EnvelopeIcon,
-    LifebuoyIcon,
+    // WalletIcon,
+    // EnvelopeIcon,
+    // LifebuoyIcon,
     SettingsIcon,
     LogoutIcon,
     XIcon
@@ -62,9 +62,9 @@ const EducatorMobileMenu: React.FC<EducatorMobileMenuProps> = ({ isOpen, onClose
 
     const accountNavItems: { view: EducatorViewType; label: string; icon: React.ReactNode }[] = [
         { view: 'profile', label: t('profile'), icon: <AcademicCapIcon className="w-6 h-6"/> },
-        { view: 'earnings', label: t('earnings'), icon: <WalletIcon className="w-6 h-6"/> },
-        { view: 'inbox', label: t('inbox'), icon: <EnvelopeIcon className="w-6 h-6"/> },
-        { view: 'support', label: t('support'), icon: <LifebuoyIcon className="w-6 h-6"/> },
+        // { view: 'earnings', label: t('earnings'), icon: <WalletIcon className="w-6 h-6"/> },
+        // { view: 'inbox', label: t('inbox'), icon: <EnvelopeIcon className="w-6 h-6"/> },
+        // { view: 'support', label: t('support'), icon: <LifebuoyIcon className="w-6 h-6"/> },
         { view: 'settings', label: t('settings'), icon: <SettingsIcon className="w-6 h-6"/> },
     ];
 

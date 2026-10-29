@@ -1,6 +1,6 @@
 import React from 'react';
 import { EducatorViewType, Educator } from '../../../shared/types';
-import { DashboardIcon, BriefcaseIcon, ProjectsIcon, FileTextIcon, AcademicCapIcon, WalletIcon, EnvelopeIcon, LifebuoyIcon, SettingsIcon, ArrowLeftIcon, LogoutIcon } from '../../../shared/components/Icons';
+import { DashboardIcon, BriefcaseIcon, ProjectsIcon, FileTextIcon, AcademicCapIcon, /* WalletIcon, EnvelopeIcon, LifebuoyIcon, */ SettingsIcon, ArrowLeftIcon, LogoutIcon } from '../../../shared/components/Icons';
 import { useLanguage } from '../../../app/providers/LanguageProvider';
 import LanguageSwitcher from '../../../shared/components/LanguageSwitcher';
 import Avatar from '../../../shared/components/Avatar';
@@ -47,9 +47,9 @@ const EducatorSidebar: React.FC<EducatorSidebarProps> = ({ currentView, navigate
 
   const secondaryNavItems: { view: EducatorViewType; label: string; icon: React.ReactNode }[] = [
     { view: 'profile', label: t('profile'), icon: <AcademicCapIcon className="w-6 h-6"/> },
-    { view: 'earnings', label: t('earnings'), icon: <WalletIcon className="w-6 h-6"/> },
-    { view: 'inbox', label: t('inbox'), icon: <EnvelopeIcon className="w-6 h-6"/> },
-    { view: 'support', label: t('support'), icon: <LifebuoyIcon className="w-6 h-6"/> },
+    // { view: 'earnings', label: t('earnings'), icon: <WalletIcon className="w-6 h-6"/> },
+    // { view: 'inbox', label: t('inbox'), icon: <EnvelopeIcon className="w-6 h-6"/> },
+    // { view: 'support', label: t('support'), icon: <LifebuoyIcon className="w-6 h-6"/> },
     { view: 'settings', label: t('settings'), icon: <SettingsIcon className="w-6 h-6"/> },
   ];
 

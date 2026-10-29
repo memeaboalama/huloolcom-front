@@ -89,7 +89,21 @@ const TaskDetailContainer: React.FC<TaskDetailContainerProps> = ({ taskId, educa
       createdAt: st.createdAt,
       modifiedAt: st.modifiedAt || undefined
     })),
-    attachments: (apiTask.attachments || []).filter((a: any) => !String(a.collection_name || '').toLowerCase().includes('deliverable')).map((a: any) => ({ id: a.id, title: a.title, name: a.name || a.original_name || a.title || 'file', url: a.url, size: String(a.size || ''), type: a.type || '' })),
+    attachments: [
+      ...(apiTask.project?.attachments || []).map((a: any) => ({
+        id: `project-${a.id}`,
+        title: a.title,
+        name: a.original_name || a.title || 'file',
+        url: a.url,
+        size: String(a.size || ''),
+        type: a.type || '',
+        uploadedAt: a.uploadedAt,
+        uploader: a.uploader,
+      })),
+      ...(apiTask.attachments || [])
+        .filter((a: any) => !String(a.collection_name || '').toLowerCase().includes('deliverable'))
+        .map((a: any) => ({ id: a.id, title: a.title, name: a.name || a.original_name || a.title || 'file', url: a.url, size: String(a.size || ''), type: a.type || '' })),
+    ],
     deliverables: (apiTask.attachments || []).filter((a: any) => String(a.collection_name || '').toLowerCase().includes('deliverable')).map((a: any) => ({ id: a.id, title: a.title, name: a.name || a.original_name || a.title || 'file', url: a.url, size: String(a.size || ''), type: a.type || '' })),
     notes: (apiTask.notes || []).map((n: any) => ({ id: n.id, content: n.content, createdAt: n.createdAt, createdBy: typeof n.createdBy === 'string' ? n.createdBy : (n.createdBy?.type === 'Admin' ? 'admin' : 'provider'), authorName: n.authorName || n.createdBy?.name || '', authorAvatar: n.authorAvatar || '' })),
     creationDate: apiTask.createdAt || '',
@@ -141,10 +155,12 @@ const TaskDetailContainer: React.FC<TaskDetailContainerProps> = ({ taskId, educa
 
   const handleAddNote = async (projectId: string, taskId: string, content: string) => {
     try {
-      await ProjectService.addTaskNote(taskId, content);
+      await ProjectService.addEducatorTaskNote(taskId, content);
+      await detail.refetch();
       addToast && addToast(t('toasts.noteAdded'));
     } catch (e: any) {
       addToast && addToast(e?.message || t('toasts.failedToAddNote'), 'error');
+      throw e;
     }
   };
 

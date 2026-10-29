@@ -4,20 +4,32 @@ import {
   isProjectAreaView,
   isProjectListView,
   PROJECT_SECTIONS,
+  PROJECT_SIDEBAR_SECTIONS,
 } from '../features/admin/constants/projectSections';
 
 describe('admin project sidebar sections', () => {
-  it('defines seven uniquely routed sections', () => {
+  it('defines all uniquely routed project sections', () => {
     expect(PROJECT_SECTIONS.map((section) => section.key)).toEqual([
       'all',
       'with_offers',
       'without_offers',
       'pending_review',
+      'pending',
       'in_progress',
       'completed',
       'canceled',
     ]);
-    expect(new Set(PROJECT_SECTIONS.map((section) => section.view)).size).toBe(7);
+    expect(new Set(PROJECT_SECTIONS.map((section) => section.view)).size).toBe(8);
+  });
+
+  it('shows only the requested sections in the sidebar and places pending before in progress', () => {
+    expect(PROJECT_SIDEBAR_SECTIONS.map((section) => section.key)).toEqual([
+      'all',
+      'with_offers',
+      'pending',
+      'in_progress',
+      'completed',
+    ]);
   });
 
   it('maps every routed section back to its project tab', () => {

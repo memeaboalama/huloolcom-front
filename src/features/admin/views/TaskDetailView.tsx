@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Project, Task, Educator, SubTask, TaskNote, Attachment, ProjectStatus, Assignment, AssignmentStatus, ViewType, TaskActivityLog } from '../../../shared/types';
-import { ArrowLeftIcon, BriefcaseIcon, CheckCircleIcon, PaperclipIcon, PlusIcon, SendIcon, ClipboardListIcon, UploadCloudIcon, ClockIcon, DollarSignIcon, CalendarDaysIcon, EditIcon, TrashIcon, CheckIcon, XCircleIcon, ChatBubbleLeftRightIcon } from '../../../shared/components/Icons';
+import { ArrowLeftIcon, BriefcaseIcon, CheckCircleIcon, PaperclipIcon, PlusIcon, SendIcon, ClipboardListIcon, UploadCloudIcon, ClockIcon, DollarSignIcon, CalendarDaysIcon, EditIcon, TrashIcon, CheckIcon, XCircleIcon, ChatBubbleLeftRightIcon, UserIcon } from '../../../shared/components/Icons';
 import Avatar from '../../../shared/components/Avatar';
 import ConfirmationModal from '../../../shared/components/modals/ConfirmationModal';
-import { ADMIN_USER } from '../../../shared/constants';
 import { useLanguage } from '../../../app/providers/LanguageProvider';
 
 interface TaskDetailViewProps {
@@ -23,7 +22,7 @@ interface TaskDetailViewProps {
     // New handlers for subtask editing and attachments
     onEditSubTask?: (projectId: string, taskId: string, subTaskId: string, newTitle: string) => void;
     onAddSubTaskAttachment?: (projectId: string, taskId: string, subTaskId: string, file: File, title?: string) => void;
-    onDeleteSubTask?: (projectId: string, taskId: string, subTaskId: string) => void;
+    onDeleteSubTask?: (projectId: string, taskId: string, subTaskId: string) => Promise<void> | void;
 }
 
 type EditableSidebarCard = 'status' | 'financials' | 'dates' | null;
@@ -42,7 +41,7 @@ const InfoCard: React.FC<{title: string, icon: React.ReactNode, children: React.
 );
 
 
-const SubTaskItem: React.FC<{ subTask: SubTask, onToggle: () => void, onEdit?: (newTitle: string) => Promise<void> | void, onAddAttachment?: (file: File, title?: string) => Promise<void> | void, onDelete?: () => void, educators?: Educator[] }> = ({ subTask, onToggle, onEdit, onAddAttachment, onDelete, educators }) => {
+const SubTaskItem: React.FC<{ subTask: SubTask, onToggle: () => void, onEdit?: (newTitle: string) => Promise<void> | void, onAddAttachment?: (file: File, title?: string) => Promise<void> | void, onDelete?: () => Promise<void> | void, educators?: Educator[] }> = ({ subTask, onToggle, onEdit, onAddAttachment, onDelete, educators }) => {
     const { t } = useLanguage();
     const [isEditing, setIsEditing] = React.useState(false);
     const [title, setTitle] = React.useState(subTask.title);
@@ -53,6 +52,7 @@ const SubTaskItem: React.FC<{ subTask: SubTask, onToggle: () => void, onEdit?: (
     const [attTitle, setAttTitle] = React.useState('');
     const [attEditTitle, setAttEditTitle] = React.useState('');
     const [open, setOpen] = React.useState(false);
+    const [isDeleteConfirmationOpen, setDeleteConfirmationOpen] = React.useState(false);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.length) {
@@ -99,10 +99,23 @@ const SubTaskItem: React.FC<{ subTask: SubTask, onToggle: () => void, onEdit?: (
         }
     };
 
-    const creator = subTask.createdBy === 'admin' ? { name: t('taskDetail.admin'), avatarUrl: (ADMIN_USER && ADMIN_USER.avatarUrl) || '' } : (educators ? educators.find(e => e.id === subTask.providerId) : null);
+    const creator = subTask.createdBy === 'admin' ? { name: t('taskDetail.admin'), avatarUrl: '' } : (educators ? educators.find(e => e.id === subTask.providerId) : null);
 
     return (
         <div className="group">
+            {onDelete && (
+                <ConfirmationModal
+                    isOpen={isDeleteConfirmationOpen}
+                    onClose={() => setDeleteConfirmationOpen(false)}
+                    onConfirm={async () => {
+                        await onDelete();
+                        setDeleteConfirmationOpen(false);
+                    }}
+                    title={t('taskDetail.deleteSubTaskTitle')}
+                    message={t('taskDetail.deleteSubTaskMessage', { title: subTask.title })}
+                    icon={<TrashIcon className="w-8 h-8" />}
+                />
+            )}
             <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50">
                 <input
                     type="checkbox"
@@ -166,7 +179,7 @@ const SubTaskItem: React.FC<{ subTask: SubTask, onToggle: () => void, onEdit?: (
                                 ) : (
                                     <button onClick={() => setIsEditing(true)} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"><EditIcon className="w-4 h-4 text-gray-400"/></button>
                                 )}
-                                {onDelete && <button onClick={onDelete} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"><TrashIcon className="w-4 h-4 text-gray-400"/></button>}
+                                {onDelete && <button onClick={() => setDeleteConfirmationOpen(true)} title={t('delete')} className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"><TrashIcon className="w-4 h-4 text-gray-400"/></button>}
                             </div>
                         </div>
                     )}
@@ -178,7 +191,13 @@ const SubTaskItem: React.FC<{ subTask: SubTask, onToggle: () => void, onEdit?: (
                     <div className="flex items-center gap-2">
                         {creator ? (
                             <>
-                                <Avatar src={creator.avatarUrl} name={creator.name} size={28} className="rounded-full" />
+                                {subTask.createdBy === 'admin' ? (
+                                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-300">
+                                        <UserIcon className="h-4 w-4" />
+                                    </span>
+                                ) : (
+                                    <Avatar src={creator.avatarUrl} name={creator.name} size={28} className="rounded-full" />
+                                )}
                                 <span className="font-semibold ms-2">{creator.name}</span>
                                 <span className="text-[11px] ms-2 px-2 py-0.5 bg-gray-100 dark:bg-slate-700 rounded-full">{subTask.createdBy === 'admin' ? t('taskDetail.admin') : t('taskDetail.specialist')}</span>
                             </>
@@ -485,7 +504,9 @@ const AdminTaskDetailView: React.FC<TaskDetailViewProps> = (props) => {
                                     (task.notes || []).map(note => <NoteItem key={note.id} note={note} />)
                                 )}
                                <form onSubmit={handleAddNote} className="flex items-center gap-3 pt-3">
-                                   <Avatar src={ADMIN_USER.avatarUrl} name={ADMIN_USER.name} size={40} />
+                                   <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-300" aria-hidden="true">
+                                       <UserIcon className="h-5 w-5" />
+                                   </span>
                                     <input type="text" value={newNoteContent} onChange={e => setNewNoteContent(e.target.value)} placeholder={t('taskDetail.writeNote')} className="w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md text-sm p-2" />
                                    <button type="submit" disabled={!newNoteContent.trim()} className="p-2 bg-brand-primary text-white rounded-md hover:bg-yellow-500 disabled:bg-yellow-400 disabled:cursor-not-allowed"><SendIcon className="w-5 h-5"/></button>
                                </form>

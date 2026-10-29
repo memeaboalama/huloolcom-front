@@ -15,6 +15,7 @@ export type ProjectTabKey =
   | 'with_offers'
   | 'without_offers'
   | 'pending_review'
+  | 'pending'
   | 'in_progress'
   | 'completed'
   | 'canceled';
@@ -31,10 +32,15 @@ export const PROJECT_SECTIONS: ProjectSection[] = [
   { key: 'with_offers', view: 'projectsWithOffers', labelKey: 'projectsView.tabs.withOffers', icon: BidsIcon },
   { key: 'without_offers', view: 'projectsWithoutOffers', labelKey: 'projectsView.tabs.withoutOffers', icon: ArchiveBoxIcon },
   { key: 'pending_review', view: 'projectsPendingReview', labelKey: 'projectsView.tabs.pendingReview', icon: ClockIcon },
+  { key: 'pending', view: 'projectsPending', labelKey: 'projectsView.tabs.pending', icon: ClockIcon },
   { key: 'in_progress', view: 'projectsInProgress', labelKey: 'projectsView.tabs.inProgress', icon: ZapIcon },
   { key: 'completed', view: 'projectsCompleted', labelKey: 'projectsView.tabs.completed', icon: CheckCircleIcon },
   { key: 'canceled', view: 'projectsCanceled', labelKey: 'projectsView.tabs.canceled', icon: XCircleIcon },
 ];
+
+export const PROJECT_SIDEBAR_SECTIONS = PROJECT_SECTIONS.filter(
+  (section) => ['all', 'with_offers', 'pending', 'in_progress', 'completed'].includes(section.key)
+);
 
 export const PROJECT_SECTION_VIEWS = PROJECT_SECTIONS.map((section) => section.view);
 

@@ -4,7 +4,6 @@ import { EducatorViewType } from '../../../shared/types';
 import { ArrowLeftIcon, ArrowRightIcon, BriefcaseIcon, CheckCircleIcon, PaperclipIcon, PlusIcon, SendIcon, ClipboardListIcon, UploadCloudIcon, ClockIcon, DollarSignIcon, CalendarIcon, EditIcon, TrashIcon, CheckIcon, XCircleIcon, ChatBubbleLeftRightIcon } from '../../../shared/components/Icons';
 import Avatar from '../../../shared/components/Avatar';
 import { useLanguage } from '../../../app/providers/LanguageProvider';
-import { ADMIN_USER } from '../../../shared/constants';
 
 interface TaskDetailViewProps {
     project: Project;
@@ -15,7 +14,7 @@ interface TaskDetailViewProps {
     backTab?: 'INVITATIONS' | 'ASSIGNMENTS';
     onAddSubTask: (projectId: string, taskId: string, title: string) => void;
     onToggleSubTask: (projectId: string, taskId: string, subTaskId: string) => void;
-    onAddNote: (projectId: string, taskId: string, content: string) => void;
+    onAddNote: (projectId: string, taskId: string, content: string) => void | Promise<void>;
     onUpdateTaskStatus: (projectId: string, taskId: string, newStatus: ProjectStatus) => void | Promise<void>;
     onUpdateTask: (projectId: string, taskId: string, taskData: Partial<Task>) => void;
     onAddDeliverable: (projectId: string, taskId: string, deliverable: Omit<Attachment, 'id'>) => void | Promise<void>;
@@ -291,6 +290,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = (props) => {
     const [isUploadingDeliverable, setIsUploadingDeliverable] = useState(false);
     const [isCompletingTask, setIsCompletingTask] = useState(false);
     const [newNoteContent, setNewNoteContent] = useState('');
+    const [isAddingNote, setIsAddingNote] = useState(false);
 
     if (!task) {
         return (
@@ -358,10 +358,18 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = (props) => {
         }
     };
 
-    const handleAddNote = async () => {
-        if (!newNoteContent.trim()) return;
-        await onAddNote(project.id, task.id, newNoteContent.trim());
-        setNewNoteContent('');
+    const handleAddNote = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newNoteContent.trim() || isAddingNote) return;
+        setIsAddingNote(true);
+        try {
+            await onAddNote(project.id, task.id, newNoteContent.trim());
+            setNewNoteContent('');
+        } catch {
+            // The container displays the failure toast; keep the draft for retry.
+        } finally {
+            setIsAddingNote(false);
+        }
     };
 
     const totalAssignedAmount = task.assignments?.find(a => a.educatorId === props.educator.id)?.amount || 0;
@@ -488,38 +496,43 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = (props) => {
                         )}
                     </InfoCard>
 
-<InfoCard title={t('taskDetail.notes')} icon={<ChatBubbleLeftRightIcon className="w-5 h-5"/>}>
-                        {(task.notes || []).length > 0 ? (
-                            <div className="space-y-3">
-                                {(task.notes || []).map(note => <NoteItem key={note.id} note={note} />)}
-                            </div>
-                        ) : canAct ? (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3">
-                                    <Avatar src={ADMIN_USER.avatarUrl} name={ADMIN_USER.name} size={40} />
+                    <InfoCard title={t('taskDetail.notes')} icon={<ChatBubbleLeftRightIcon className="w-5 h-5"/>}>
+                        <div className="space-y-3">
+                            {(task.notes || []).length > 0 ? (
+                                (task.notes || []).map(note => <NoteItem key={note.id} note={note} />)
+                            ) : (
+                                <p className="text-center text-sm text-slate-500 dark:text-slate-400 py-4 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">{t('taskDetail.noNotes')}</p>
+                            )}
+                            {canAct && (
+                                <form onSubmit={handleAddNote} className="flex items-center gap-3 pt-3">
+                                    <Avatar src={props.educator.avatarUrl} name={props.educator.name} size={40} />
                                     <input
                                         type="text"
                                         value={newNoteContent}
                                         onChange={e => setNewNoteContent(e.target.value)}
+                                        disabled={isAddingNote}
                                         placeholder={t('taskDetail.writeNote')}
-                                        className="w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md text-sm p-2"
+                                        className="w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-md text-sm p-2 disabled:opacity-60"
                                     />
                                     <button
-                                        type="button"
-                                        onClick={handleAddNote}
-                                        disabled={!newNoteContent.trim()}
-                                        className="px-3 py-2 bg-brand-primary text-white rounded-md text-sm hover:bg-yellow-500 disabled:bg-yellow-400 disabled:cursor-not-allowed">
-                                        <SendIcon className="w-4 h-4"/>
-                                        {t('taskDetail.addNote')}
+                                        type="submit"
+                                        disabled={!newNoteContent.trim() || isAddingNote}
+                                        className="p-2 bg-brand-primary text-white rounded-md hover:bg-yellow-500 disabled:bg-yellow-400 disabled:cursor-not-allowed">
+                                        {isAddingNote ? (
+                                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" aria-label={t('loading')}>
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l2.647-2.647z" />
+                                            </svg>
+                                        ) : (
+                                            <SendIcon className="w-5 h-5"/>
+                                        )}
                                     </button>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-center text-sm text-slate-500 dark:text-slate-400 py-4 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">{t('taskDetail.noNotes')}</p>
-                        )}
+                                </form>
+                            )}
+                        </div>
                     </InfoCard>
 
-                    <InfoCard title={t('taskDetail.activityLog')} icon={<ClockIcon className="w-5 h-5"/>}>
+                    {/* <InfoCard title={t('taskDetail.activityLog')} icon={<ClockIcon className="w-5 h-5"/>}>
                         {(task.activityLog || []).length === 0 ? (
                             <p className="text-center text-sm text-slate-500 dark:text-slate-400 py-4 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl">{t('taskDetail.noActivity')}</p>
                         ) : (
@@ -527,7 +540,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = (props) => {
                                 {(task.activityLog || []).map(log => <TaskActivityItem key={log.id} log={log} />)}
                             </div>
                         )}
-                    </InfoCard>
+                    </InfoCard> */}
                 </main>
             </div>
         </div>
